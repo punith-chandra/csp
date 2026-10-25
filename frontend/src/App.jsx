@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import SafetyDisclaimer from './components/SafetyDisclaimer';
@@ -16,8 +16,20 @@ import AIChatBoard from './components/AIChatBoard';
 export default function App() {
   // 'chatboard' (ChatGPT interface matching screenshot) or 'showcase' (Full project website)
   const [viewMode, setViewMode] = useState('chatboard');
+  const [language, setLanguage] = useState(() => window.localStorage.getItem('foodpure-language') === 'te' ? 'te' : 'en');
   const [selectedFoodForAI, setSelectedFoodForAI] = useState('');
   const [presentationOpen, setPresentationOpen] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.lang = language === 'te' ? 'te' : 'en';
+  }, [language]);
+
+  const handleLanguageChange = (nextLanguage) => {
+    const next = nextLanguage === 'te' ? 'te' : 'en';
+    window.localStorage.setItem('foodpure-language', next);
+    document.documentElement.lang = next;
+    setLanguage(next);
+  };
 
   const handleSelectFoodForAI = (foodName) => {
     setSelectedFoodForAI(foodName);
@@ -37,6 +49,8 @@ export default function App() {
       <div className="h-screen w-screen overflow-hidden">
         <AIChatBoard 
           initialQuery={selectedFoodForAI}
+          language={language}
+          onLanguageChange={handleLanguageChange}
           onSwitchToProjectView={() => setViewMode('showcase')}
           onOpenPresentation={() => setPresentationOpen(true)}
         />
@@ -52,11 +66,13 @@ export default function App() {
 
   // If user is in College Project Showcase mode
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#1e293b] flex flex-col font-sans selection:bg-brand-accent selection:text-white">
+    <div className={`min-h-screen bg-[#f8fafc] text-[#1e293b] flex flex-col font-sans selection:bg-brand-accent selection:text-white ${language === 'te' ? 'font-telugu' : ''}`}>
       {/* Sticky Navigation */}
       <Navbar 
         onOpenPresentation={() => setPresentationOpen(true)} 
         onSwitchToChatboard={() => setViewMode('chatboard')}
+        language={language}
+        onLanguageChange={handleLanguageChange}
         isChatboardActive={viewMode === 'chatboard'}
       />
 
@@ -74,6 +90,7 @@ export default function App() {
 
         {/* Hero Section */}
         <HeroSection 
+          language={language}
           onCheckFoodClick={() => {
             setViewMode('chatboard');
           }}
@@ -84,33 +101,35 @@ export default function App() {
         />
 
         {/* Safety Disclaimer Banner */}
-        <SafetyDisclaimer />
+        <SafetyDisclaimer language={language} />
 
         {/* Food Safety AI Interactive Assistant */}
         <FoodSafetyAI 
           initialFood={selectedFoodForAI} 
           onSelectCategory={handleSelectCategory}
+          language={language}
         />
 
         {/* Food Categories Directory & Modals */}
         <FoodCategories 
           onSelectFoodForAI={handleSelectFoodForAI}
+          language={language}
         />
 
         {/* Community Impact & Field Survey Dashboard */}
-        <Dashboard />
+        <Dashboard language={language} />
 
         {/* Awareness Activities Showcase */}
-        <AwarenessActivities />
+        <AwarenessActivities language={language} />
 
         {/* Meet Our Team (All 7 Members & Guide) */}
-        <MeetTheTeam />
+        <MeetTheTeam language={language} />
 
         {/* About Project & Tanuku Roadmap */}
-        <AboutProject />
+        <AboutProject language={language} />
 
         {/* Trusted Regulatory Sources */}
-        <TrustedSources />
+        <TrustedSources language={language} />
       </main>
 
       {/* College Project Presentation Modal Deck */}
@@ -121,6 +140,7 @@ export default function App() {
 
       {/* Comprehensive Institutional Footer */}
       <Footer 
+        language={language}
         onOpenPresentation={() => setPresentationOpen(true)} 
       />
     </div>

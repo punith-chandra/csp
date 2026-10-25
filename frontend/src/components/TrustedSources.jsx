@@ -1,7 +1,8 @@
 import React from 'react';
 import { ExternalLink, ShieldCheck, CheckCircle2, BookOpen, Globe } from 'lucide-react';
+import { t } from '../i18n';
 
-export default function TrustedSources() {
+export default function TrustedSources({ language = 'en' }) {
   const sources = [
     {
       name: "FSSAI (Food Safety & Standards Authority of India)",
@@ -54,20 +55,20 @@ export default function TrustedSources() {
   ];
 
   return (
-    <section id="sources" className="py-16 sm:py-24 bg-gradient-to-b from-slate-50 to-white border-t border-slate-100">
+    <section id="sources" className={`py-16 sm:py-24 bg-gradient-to-b from-slate-50 to-white border-t border-slate-100 ${language === 'te' ? 'font-telugu' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-brand-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Globe className="w-4 h-4 text-emerald-600" />
-            Verified Authorities
+            {t(language, 'Verified Authorities')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-dark tracking-tight">
-            Trusted Food Safety Sources
+            {t(language, 'Trusted Food Safety Sources')}
           </h2>
           <p className="mt-2 text-base text-slate-600">
-            Our AI assistant and educational modules derive information strictly from authenticated government departments, multilateral bodies, and peer-reviewed laboratories.
+            {t(language, 'Our AI assistant and educational modules derive information strictly from authenticated government departments, multilateral bodies, and peer-reviewed laboratories.')}
           </p>
         </div>
 
@@ -84,26 +85,26 @@ export default function TrustedSources() {
                     {src.icon}
                   </span>
                   <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                    {src.badge}
+                    {t(language, src.badge)}
                   </span>
                 </div>
 
                 <h3 className="text-base font-extrabold text-brand-dark group-hover:text-brand-primary transition-colors">
-                  {src.name}
+                  {t(language, src.name)}
                 </h3>
                 
                 <span className="text-[11px] font-semibold text-brand-teal block mt-0.5">
-                  {src.type}
+                  {t(language, src.type)}
                 </span>
 
                 <p className="mt-3 text-xs text-slate-600 leading-relaxed">
-                  {src.desc}
+                  {t(language, src.desc)}
                 </p>
               </div>
 
               <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 <span className="text-[11px] font-semibold text-slate-400">
-                  Official Portal
+                  {t(language, 'Official Portal')}
                 </span>
 
                 <a
@@ -112,7 +113,7 @@ export default function TrustedSources() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-emerald-50 text-brand-dark hover:text-brand-primary border border-slate-200 hover:border-emerald-300 text-xs font-bold transition-all"
                 >
-                  <span>Visit Source</span>
+                  <span>{t(language, 'Visit Source')}</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>

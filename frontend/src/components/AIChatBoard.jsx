@@ -3,11 +3,12 @@ import {
   Plus, Search, PanelLeftClose, PanelLeft, RotateCcw, 
   Mic, MicOff, Copy, Check, Volume2, VolumeX, ThumbsUp, 
   ThumbsDown, ShieldCheck, BarChart3, BookOpen, 
-  Users, Sparkles, ExternalLink, ShieldAlert, FileText, ArrowRight
+  Users, Sparkles, ExternalLink, ShieldAlert, FileText, ArrowRight, Languages
 } from 'lucide-react';
 import { analyzeFoodItem } from '../services/api';
+import { t } from '../i18n';
 
-export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation, initialQuery = '' }) {
+export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation, initialQuery = '', language = 'en', onLanguageChange }) {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
@@ -154,7 +155,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'en-IN';
+    recognition.lang = language === 'te' ? 'te-IN' : 'en-IN';
     recognition.interimResults = false;
 
     recognition.onstart = () => setIsListening(true);
@@ -183,7 +184,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
   };
 
   return (
-    <div className="flex h-screen bg-[#ffffff] text-[#0d0d0d] font-sans antialiased overflow-hidden selection:bg-emerald-100 selection:text-emerald-900">
+    <div className={`flex h-screen bg-[#f7faf8] text-[#0d0d0d] font-sans antialiased overflow-hidden selection:bg-emerald-100 selection:text-emerald-900 ${language === 'te' ? 'font-telugu' : ''}`}>
       
       {/* 1. Left Sidebar: Unique Project Identity & Tools */}
       <aside 
@@ -204,7 +205,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                   FoodPure AI
                 </span>
                 <span className="text-[10px] font-semibold text-emerald-600 block uppercase tracking-wider">
-                  Food Safety & Purity
+                  {t(language, 'Food Safety & Purity')}
                 </span>
               </div>
             </div>
@@ -233,7 +234,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
             className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[13px] font-semibold text-emerald-800 transition-colors mb-3 border border-emerald-200/60"
           >
             <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span>New Food Analysis</span>
+            <span>{t(language, 'New Food Analysis')}</span>
           </button>
 
           {/* Project Feature Tools */}
@@ -243,41 +244,41 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
               className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
             >
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Food Safety Analyzer</span>
+              <span>{t(language, 'Food Safety Analyzer')}</span>
             </button>
             <button 
               onClick={() => setStandardsModalOpen(true)}
               className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
             >
               <BookOpen className="w-4 h-4 text-teal-600" />
-              <span>FSSAI & AGMARK Rules</span>
+              <span>{t(language, 'FSSAI & AGMARK Rules')}</span>
             </button>
             <button 
               onClick={onSwitchToProjectView}
               className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
             >
               <BarChart3 className="w-4 h-4 text-blue-600" />
-              <span>Survey & Community Stats</span>
+              <span>{t(language, 'Survey & Community Stats')}</span>
             </button>
             <button 
               onClick={onOpenPresentation}
               className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
             >
               <Users className="w-4 h-4 text-amber-600" />
-              <span>Project Team & Guide</span>
+              <span>{t(language, 'Project Team & Guide')}</span>
             </button>
             <button 
               onClick={onSwitchToProjectView}
               className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
             >
               <FileText className="w-4 h-4 text-indigo-600" />
-              <span>Full Website Showcase</span>
+              <span>{t(language, 'Full Website Showcase')}</span>
             </button>
           </div>
 
           {/* Section: Recent Food Inquiries */}
           <div className="px-3 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Recent Analyses
+            {t(language, 'Recent Analyses')}
           </div>
 
           {/* History List */}
@@ -310,7 +311,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                   Puneeth chandra Peethala
                 </div>
                 <div className="text-[11px] text-emerald-700 font-semibold truncate">
-                  Project Lead • 24A81A05G9
+                  {t(language, 'Project Lead')} • 24A81A05G9
                 </div>
               </div>
             </div>
@@ -330,10 +331,10 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
       </aside>
 
       {/* 2. Main Center Content Canvas */}
-      <div className="flex-1 flex flex-col h-full bg-[#ffffff] relative overflow-hidden">
+      <div className="flex-1 flex flex-col h-full bg-[radial-gradient(ellipse_at_top,_#ecfdf5_0%,_#ffffff_42%,_#f8fafc_100%)] relative overflow-hidden">
         
         {/* Top Header Bar */}
-        <header className="h-14 flex items-center justify-between px-4 sm:px-6 z-20 border-b border-slate-100">
+        <header className="h-14 flex items-center justify-between px-4 sm:px-6 z-20 border-b border-slate-200/70 bg-white/75 backdrop-blur-xl">
           <div className="flex items-center gap-2">
             {!sidebarOpen && (
               <div className="flex items-center gap-2">
@@ -356,33 +357,43 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
             )}
             <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
               <Sparkles className="w-3 h-3" />
-              AI-Powered Food Safety and Purity Analysis
+              {t(language, 'AI-Powered Food Safety and Purity Analysis')}
             </span>
           </div>
 
           {/* Top Right: Project Showcase & Presentation buttons */}
           <div className="flex items-center gap-2">
             <button
+              type="button"
+              onClick={() => onLanguageChange?.(language === 'en' ? 'te' : 'en')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              aria-label={language === 'en' ? 'Switch language to Telugu' : 'Switch language to English'}
+              title={language === 'en' ? 'తెలుగులో చూపించు' : 'Show in English'}
+            >
+              <Languages className="w-3.5 h-3.5" />
+              <span>{language === 'en' ? 'తెలుగు' : 'English'}</span>
+            </button>
+            <button
               onClick={onSwitchToProjectView}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors border border-slate-200"
-              title="Switch to Full Project Website"
+              title={t(language, 'Switch to Full Project Website')}
             >
               <BarChart3 className="w-3.5 h-3.5 text-blue-600" />
-              <span className="hidden sm:inline">Project Showcase</span>
+              <span className="hidden sm:inline">{t(language, 'Project Showcase')}</span>
             </button>
 
             <button
               onClick={onOpenPresentation}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-xs font-semibold text-white transition-colors shadow-xs"
-              title="Review Project Slides & Team"
+              title={t(language, 'Review Project Slides & Team')}
             >
-              <span>Presentation</span>
+              <span>{t(language, 'Presentation')}</span>
             </button>
 
             <button
               onClick={handleNewChat}
               className="p-1.5 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
-              title="New session"
+              title={t(language, 'New session')}
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -396,16 +407,21 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
             /* UNIQUE OFFICIAL LANDING SCREEN */
             <div className="flex-1 flex flex-col items-center justify-center my-auto text-center px-4 py-8 animate-fadeIn">
               
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 text-white flex items-center justify-center shadow-md mb-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-800 shadow-sm mb-5">
+                <Sparkles className="h-3.5 w-3.5" />
+                {t(language, 'Community Service Project')} • Sri Vasavi Engineering College
+              </div>
+
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-700 via-teal-600 to-cyan-500 text-white flex items-center justify-center shadow-[0_12px_35px_rgba(5,150,105,0.25)] mb-5">
                 <ShieldCheck className="w-9 h-9" />
               </div>
 
-              <h1 className="text-[26px] sm:text-[32px] font-black text-slate-900 tracking-tight mb-2 leading-tight">
-                AI-Powered Food Safety and Purity Analysis
+              <h1 className="text-[26px] sm:text-[34px] font-black text-slate-900 tracking-tight mb-2 leading-tight max-w-2xl">
+                {t(language, 'AI-Powered Food Safety and Purity Analysis')}
               </h1>
               
               <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto mb-8 font-medium">
-                Detect adulteration risks, learn simple scientific home tests, and verify consumer food safety standards.
+                {t(language, 'Detect adulteration risks, learn simple scientific home tests, and verify consumer food safety standards.')}
               </p>
 
               {/* Quick food staple chips */}
@@ -426,18 +442,18 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg">{item.icon}</span>
                       <span className="font-bold text-sm text-slate-900 group-hover:text-emerald-700">
-                        {item.name}
+                        {t(language, item.name)}
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-500 leading-tight">
-                      {item.desc}
+                        <div className="text-[11px] text-slate-500 leading-tight">
+                      {t(language, item.desc)}
                     </div>
                   </button>
                 ))}
               </div>
 
               <div className="text-[11px] text-slate-400 font-medium">
-                Department of Computer Science and Engineering • Sri Vasavi Engineering College
+                {t(language, 'Department of Computer Science and Engineering • Sri Vasavi Engineering College')}
               </div>
 
             </div>
@@ -495,10 +511,10 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                           <div className="border-b border-slate-100 pb-2">
                             <div className="flex items-center gap-2">
                               <h2 className="text-xl font-bold text-slate-900">
-                                {msg.foodData.foodName} – Safety & Purity Advisory
+                                {msg.foodData.foodName} – {t(language, 'Safety & Purity Advisory')}
                               </h2>
                               <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                                Verified
+                                {t(language, 'Verified')}
                               </span>
                             </div>
                             <p className="text-xs text-slate-500 mt-0.5">
@@ -509,7 +525,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                           {/* 1. Common Adulterants */}
                           <div className="space-y-1.5">
                             <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                              <span>1. Possible Adulterants</span>
+                              <span>1. {t(language, 'Possible Adulterants')}</span>
                             </h3>
                             <ul className="list-disc list-inside space-y-1 text-slate-800 text-[14px]">
                               {(msg.foodData.adulterants || []).map((item, idx) => (
@@ -521,7 +537,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                           {/* 2. Why Adulteration Occurs */}
                           <div className="space-y-1">
                             <h3 className="font-bold text-slate-900 text-base">
-                              2. Motivation for Adulteration
+                              2. {t(language, 'Motivation for Adulteration')}
                             </h3>
                             <p className="text-slate-700 text-[14px] leading-relaxed">
                               {msg.foodData.whyAdulterated}
@@ -531,28 +547,28 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                           {/* 3. Awareness Check */}
                           <div className="space-y-2 bg-emerald-50/50 border border-emerald-200/80 p-4 rounded-xl">
                             <h3 className="font-bold text-emerald-950 text-base flex items-center gap-2">
-                              <span>🧪 3. Preliminary Awareness Test Method</span>
+                              <span>🧪 3. {t(language, 'Preliminary Awareness Test Method')}</span>
                             </h3>
                             <p className="text-[14px] text-slate-800">
-                              <strong>Check: </strong>{msg.foodData.testMethod}
+                              <strong>{t(language, 'Check:')} </strong>{msg.foodData.testMethod}
                             </p>
                             {msg.foodData.testProcedure && (
                               <p className="text-[14px] text-slate-700 whitespace-pre-line bg-white p-3 rounded-lg border border-emerald-200">
-                                <strong>Step-by-step Procedure: </strong><br />{msg.foodData.testProcedure}
+                                <strong>{t(language, 'Step-by-step Procedure:')} </strong><br />{msg.foodData.testProcedure}
                               </p>
                             )}
                             <p className="text-[14px] text-slate-800">
-                              <strong>Expected Result: </strong>{msg.foodData.observation}
+                              <strong>{t(language, 'Expected Result:')} </strong>{msg.foodData.observation}
                             </p>
                             <div className="text-[12px] text-amber-900 bg-amber-50 p-2.5 rounded border border-amber-200 mt-2 font-medium">
-                              ⚠️ <em><strong>Advisory:</strong> This is a preliminary household awareness check. Certified laboratory testing is required for scientific legal confirmation. Do not consume tested food portions.</em>
+                              ⚠️ <em><strong>{t(language, 'Advisory:')}</strong> This is a preliminary household awareness check. Certified laboratory testing is required for scientific legal confirmation. Do not consume tested food portions.</em>
                             </div>
                           </div>
 
                           {/* 4. Health Concerns */}
                           <div className="space-y-1.5">
                             <h3 className="font-bold text-slate-900 text-base">
-                              4. Potential Health Hazards
+                              4. {t(language, 'Potential Health Hazards')}
                             </h3>
                             <ul className="list-disc list-inside space-y-1 text-slate-800 text-[14px]">
                               {(msg.foodData.healthRisks || []).map((risk, idx) => (
@@ -564,7 +580,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                           {/* 5. Safe Buying Tips */}
                           <div className="space-y-1.5">
                             <h3 className="font-bold text-slate-900 text-base">
-                              5. 🛒 Safe Purchasing Recommendations
+                              5. 🛒 {t(language, 'Safe Purchasing Recommendations')}
                             </h3>
                             <ul className="list-disc list-inside space-y-1 text-slate-800 text-[14px]">
                               {(msg.foodData.safeTips || []).map((tip, idx) => (
@@ -576,7 +592,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                           {/* 6. Storage Tips */}
                           <div className="space-y-1.5">
                             <h3 className="font-bold text-slate-900 text-base">
-                              6. 📦 Proper Storage Guidelines
+                              6. 📦 {t(language, 'Proper Storage Guidelines')}
                             </h3>
                             <ul className="list-disc list-inside space-y-1 text-slate-800 text-[14px]">
                               {(msg.foodData.storageTips || []).map((tip, idx) => (
@@ -587,7 +603,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
 
                           {/* 7. Official Sources */}
                           <div className="space-y-1 pt-2 border-t border-slate-200 text-xs text-slate-600">
-                            <strong>Authoritative References & Standards:</strong>
+                            <strong>{t(language, 'Authoritative References & Standards:')}</strong>
                             <div className="flex flex-wrap gap-2 mt-1">
                               {(msg.foodData.sources || []).map((s, idx) => (
                                 <a
@@ -612,7 +628,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                         <button
                           onClick={() => handleCopy(msg.id, msg.foodData ? getFoodSummaryText(msg.foodData) : msg.content)}
                           className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
-                          title="Copy response"
+                          title={t(language, 'Copy response')}
                         >
                           {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                         </button>
@@ -620,21 +636,21 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                         <button
                           onClick={() => handleSpeak(msg.id, msg.foodData ? getFoodSummaryText(msg.foodData) : msg.content)}
                           className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
-                          title="Read aloud"
+                          title={t(language, 'Read aloud')}
                         >
                           {speakingId === msg.id ? <VolumeX className="w-3.5 h-3.5 text-rose-600" /> : <Volume2 className="w-3.5 h-3.5" />}
                         </button>
 
                         <button
                           className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
-                          title="Helpful analysis"
+                          title={t(language, 'Helpful analysis')}
                         >
                           <ThumbsUp className="w-3.5 h-3.5" />
                         </button>
 
                         <button
                           className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
-                          title="Report concern"
+                          title={t(language, 'Report concern')}
                         >
                           <ThumbsDown className="w-3.5 h-3.5" />
                         </button>
@@ -642,7 +658,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                         <button
                           onClick={() => handleSend(messages[messages.length - 2]?.content || 'Milk')}
                           className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
-                          title="Re-analyze"
+                          title={t(language, 'Re-analyze')}
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
                         </button>
@@ -660,7 +676,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                   <div className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce" />
                   <div className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.2s]" />
                   <div className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.4s]" />
-                  <span className="font-mono text-emerald-800 ml-1">Analyzing food safety data & certified tests...</span>
+                  <span className="font-mono text-emerald-800 ml-1">{t(language, 'Analyzing food safety data & certified tests...')}</span>
                 </div>
               )}
 
@@ -675,7 +691,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
             {quickMenuOpen && (
               <div className="absolute bottom-20 left-0 bg-white border border-slate-200 rounded-2xl p-3 shadow-xl z-30 max-w-xs animate-fadeIn">
                 <div className="text-[11px] font-bold uppercase text-emerald-700 mb-2 px-1">
-                  Common Food Commodities
+                  {t(language, 'Common Food Commodities')}
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   {[
@@ -697,7 +713,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                       className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-emerald-50 text-xs font-semibold text-slate-800 transition-colors"
                     >
                       <span>{item.icon}</span>
-                      <span>{item.name}</span>
+                      <span>{t(language, item.name)}</span>
                     </button>
                   ))}
                 </div>
@@ -711,7 +727,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
               <button
                 onClick={() => setQuickMenuOpen(!quickMenuOpen)}
                 className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-full transition-colors mr-1"
-                title="Quick food staples menu"
+                title={t(language, 'Quick food staples menu')}
               >
                 <Plus className="w-5 h-5 stroke-[2]" />
               </button>
@@ -723,7 +739,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Ask about food safety, adulteration checks, or test methods (e.g. Milk, Turmeric, Honey)..."
+                placeholder={t(language, 'Ask about food safety, adulteration checks, or test methods (e.g. Milk, Turmeric, Honey)...')}
                 className="flex-1 bg-transparent py-1.5 px-2 text-[14px] sm:text-[15px] text-[#0d0d0d] placeholder:text-slate-400 focus:outline-none"
               />
 
@@ -734,7 +750,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                 className={`p-1.5 rounded-full transition-colors mr-1 ${
                   isListening ? 'text-rose-600 bg-rose-50 animate-pulse' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
                 }`}
-                title="Voice inquiry"
+                title={t(language, 'Voice inquiry')}
               >
                 {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </button>
@@ -744,7 +760,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                 onClick={() => handleSend()}
                 disabled={loading || !inputValue.trim()}
                 className="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-30 disabled:hover:bg-emerald-600 text-white flex items-center justify-center transition-all shrink-0 shadow-xs"
-                title="Analyze food safety"
+                title={t(language, 'Analyze food safety')}
               >
                 <ArrowRight className="w-4 h-4" />
               </button>
@@ -764,7 +780,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2 text-emerald-800 font-extrabold text-base">
                 <BookOpen className="w-5 h-5 text-emerald-600" />
-                <span>Certified Food Safety Standards</span>
+                <span>{t(language, 'Certified Food Safety Standards')}</span>
               </div>
               <button 
                 onClick={() => setStandardsModalOpen(false)}
@@ -792,7 +808,7 @@ export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation,
                 onClick={() => setStandardsModalOpen(false)}
                 className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700"
               >
-                Close Standards Guide
+                {t(language, 'Close Standards Guide')}
               </button>
             </div>
           </div>

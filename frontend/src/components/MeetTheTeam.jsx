@@ -3,8 +3,9 @@ import {
   Users, Award, GraduationCap, Sparkles, ShieldCheck, 
   Code2, Database, Layout, Search, CheckSquare, Presentation, Compass 
 } from 'lucide-react';
+import { t } from '../i18n';
 
-export default function MeetTheTeam() {
+export default function MeetTheTeam({ language = 'en' }) {
   const guideInfo = {
     name: "Mr. Syed Akheel Hassan Gori",
     role: "Project Guide & Faculty Mentor",
@@ -88,20 +89,20 @@ export default function MeetTheTeam() {
   ];
 
   return (
-    <section id="team" className="py-16 sm:py-24 bg-gradient-to-b from-white via-emerald-50/20 to-slate-50 border-t border-slate-100">
+    <section id="team" className={`py-16 sm:py-24 bg-gradient-to-b from-white via-emerald-50/20 to-slate-50 border-t border-slate-100 ${language === 'te' ? 'font-telugu' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/70 border border-emerald-300 text-brand-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Users className="w-4 h-4 text-emerald-700" />
-            CSE Project Team
+            {t(language, 'CSE Project Team')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-dark tracking-tight">
-            MEET OUR TEAM
+            {t(language, 'MEET OUR TEAM')}
           </h2>
           <p className="mt-2 text-base text-slate-600">
-            Dedicated team members from the Department of Computer Science and Engineering, Sri Vasavi Engineering College (Autonomous), Tanuku.
+            {t(language, 'Dedicated team members from the Department of Computer Science and Engineering, Sri Vasavi Engineering College (Autonomous), Tanuku.')}
           </p>
         </div>
 
@@ -117,19 +118,19 @@ export default function MeetTheTeam() {
               <div className="flex-1">
                 <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-400/20 border border-emerald-300/30 text-emerald-300 text-xs font-bold mb-2">
                   <GraduationCap className="w-3.5 h-3.5" />
-                  <span>PROJECT GUIDE & MENTOR</span>
+                  <span>{t(language, 'PROJECT GUIDE & MENTOR')}</span>
                 </div>
                 <h3 className="text-2xl font-black tracking-tight text-white">
                   {guideInfo.name}
                 </h3>
                 <p className="text-sm font-semibold text-emerald-100 mt-1">
-                  {guideInfo.role} • {guideInfo.dept}
+                  {t(language, guideInfo.role)} • {t(language, guideInfo.dept)}
                 </p>
                 <p className="text-xs text-emerald-200/80 mt-1">
                   {guideInfo.institution}, {guideInfo.location}
                 </p>
                 <p className="mt-3 text-xs text-emerald-100/90 leading-relaxed max-w-xl">
-                  Providing academic oversight, technical direction in AI/RAG integration, and community engagement guidance for the "AI-Powered Food Safety and Purity Analysis" initiative.
+                  {t(language, 'Providing academic oversight, technical direction in AI/RAG integration, and community engagement guidance for the "AI-Powered Food Safety and Purity Analysis" initiative.')}
                 </p>
               </div>
             </div>
@@ -174,12 +175,12 @@ export default function MeetTheTeam() {
                   {/* Role with Highlight Effect */}
                   <div className={`mt-1.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all ${member.accent} group-hover:shadow-sm`}>
                     {member.icon}
-                    <span>{member.role}</span>
+                    <span>{t(language, member.role)}</span>
                   </div>
                 </div>
 
                 <p className="text-xs text-slate-500 text-center leading-relaxed mt-2">
-                  {member.roleDesc}
+                  {t(language, member.roleDesc)}
                 </p>
               </div>
 

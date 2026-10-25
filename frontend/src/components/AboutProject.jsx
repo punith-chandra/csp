@@ -3,8 +3,9 @@ import {
   Info, Target, MapPin, Compass, ArrowRight, 
   CheckCircle2, Sparkles, BookOpen, HeartHandshake 
 } from 'lucide-react';
+import { t } from '../i18n';
 
-export default function AboutProject() {
+export default function AboutProject({ language = 'en' }) {
   const timelineSteps = [
     {
       title: "1. Research & Synthesis",
@@ -45,20 +46,20 @@ export default function AboutProject() {
   ];
 
   return (
-    <section id="about" className="py-16 sm:py-24 bg-white border-t border-slate-100">
+    <section id="about" className={`py-16 sm:py-24 bg-white border-t border-slate-100 ${language === 'te' ? 'font-telugu' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-brand-primary text-xs font-bold uppercase tracking-wider mb-3">
             <HeartHandshake className="w-4 h-4 text-emerald-600" />
-            Institutional Mission
+            {t(language, 'Institutional Mission')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-dark tracking-tight">
-            About AI-Powered Food Safety and Purity Analysis
+            {t(language, 'About AI-Powered Food Safety and Purity Analysis')}
           </h2>
           <p className="mt-2 text-base text-slate-600">
-            A comprehensive Community Service Project (CSP) initiated by Computer Science & Engineering students to protect public health through grassroots food adulteration awareness and AI technology.
+            {t(language, 'A comprehensive Community Service Project (CSP) initiated by Computer Science & Engineering students to protect public health through grassroots food adulteration awareness and AI technology.')}
           </p>
         </div>
 
@@ -72,25 +73,25 @@ export default function AboutProject() {
                 <Target className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-extrabold text-brand-dark">
-                Project Objectives
+                {t(language, 'Project Objectives')}
               </h3>
             </div>
             <ul className="space-y-3 text-xs sm:text-sm text-slate-700">
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Demystify adulteration risks in daily dietary staples including milk, spices, edible oils, and sweeteners.</span>
+                <span>{t(language, 'Demystify adulteration risks in daily dietary staples including milk, spices, edible oils, and sweeteners.')}</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Empower consumers with simple, non-toxic preliminary awareness checks that can be performed safely at home.</span>
+                <span>{t(language, 'Empower consumers with simple, non-toxic preliminary awareness checks that can be performed safely at home.')}</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Educate citizens on reading food packaging, recognizing AGMARK/FSSAI credentials, and avoiding unhygienic loose supplies.</span>
+                <span>{t(language, 'Educate citizens on reading food packaging, recognizing AGMARK/FSSAI credentials, and avoiding unhygienic loose supplies.')}</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Combine on-ground community surveys with modern AI tools to ensure accessible, 24/7 food safety guidance for all.</span>
+                <span>{t(language, 'Combine on-ground community surveys with modern AI tools to ensure accessible, 24/7 food safety guidance for all.')}</span>
               </li>
             </ul>
           </div>
@@ -102,19 +103,19 @@ export default function AboutProject() {
                 <MapPin className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-extrabold text-brand-dark">
-                Location & Demographic Focus
+                {t(language, 'Location & Demographic Focus')}
               </h3>
             </div>
             
             <div className="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
               <p>
-                <strong>Geographic Focus: </strong>Tanuku and contiguous urban/semi-urban mandals in West Godavari District, Andhra Pradesh.
+                <strong>{t(language, 'Geographic Focus: ')}</strong>{t(language, 'Tanuku and contiguous urban/semi-urban mandals in West Godavari District, Andhra Pradesh.')}
               </p>
               <p>
-                <strong>Community Target: </strong>Residential colonies, weekly local vegetable markets (rythu bazaars), small grocery stores (kirana shops), school communities, and apartment associations.
+                <strong>{t(language, 'Community Target: ')}</strong>{t(language, 'Residential colonies, weekly local vegetable markets (rythu bazaars), small grocery stores (kirana shops), school communities, and apartment associations.')}
               </p>
               <p>
-                <strong>Key Rationale: </strong>Rapid urbanization and reliance on decentralized loose grocery supply chains in regional towns highlight the urgent need for consumer awareness regarding synthetic adulterants.
+                <strong>{t(language, 'Key Rationale: ')}</strong>{t(language, 'Rapid urbanization and reliance on decentralized loose grocery supply chains in regional towns highlight the urgent need for consumer awareness regarding synthetic adulterants.')}
               </p>
             </div>
           </div>
@@ -125,10 +126,10 @@ export default function AboutProject() {
         <div className="bg-slate-50 rounded-2xl p-6 sm:p-10 border border-slate-200 shadow-premium">
           <div className="text-center mb-10">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/70 px-3 py-1 rounded-full border border-emerald-300">
-              Structured Roadmap
+              {t(language, 'Structured Roadmap')}
             </span>
             <h3 className="text-xl sm:text-2xl font-black text-brand-dark mt-2">
-              Community Service Project Timeline
+              {t(language, 'Community Service Project Timeline')}
             </h3>
           </div>
 
@@ -141,14 +142,14 @@ export default function AboutProject() {
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-2xl">{step.icon}</span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                    {step.status}
+                    {t(language, step.status)}
                   </span>
                 </div>
                 <h4 className="font-bold text-sm text-brand-dark mb-1.5 group-hover:text-brand-primary transition-colors">
-                  {step.title}
+                  {t(language, step.title)}
                 </h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  {step.desc}
+                  {t(language, step.desc)}
                 </p>
               </div>
             ))}

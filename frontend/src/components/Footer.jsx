@@ -1,7 +1,8 @@
 import React from 'react';
 import { Shield, Sparkles, Heart, ArrowUp, GraduationCap } from 'lucide-react';
+import { t } from '../i18n';
 
-export default function Footer({ onOpenPresentation }) {
+export default function Footer({ onOpenPresentation, language = 'en' }) {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -23,17 +24,17 @@ export default function Footer({ onOpenPresentation }) {
                   AI-Powered Food Safety & Purity
                 </span>
                 <span className="text-xs text-brand-accent font-medium">
-                  Food Adulteration & Purity Analysis
+                  {t(language, 'Food Adulteration & Purity Analysis')}
                 </span>
               </div>
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
-              An AI-powered Community Service Project developed to empower households and local vendors with scientifically grounded food safety awareness.
+              {t(language, 'An AI-powered Community Service Project developed to empower households and local vendors with scientifically grounded food safety awareness.')}
             </p>
 
             <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-200">
-              <p className="font-bold text-white">“Know Your Food. Protect Your Health.”</p>
+              <p className="font-bold text-white">“{t(language, 'Know Your Food. Protect Your Health.')}”</p>
             </div>
           </div>
 
@@ -41,7 +42,7 @@ export default function Footer({ onOpenPresentation }) {
           <div className="space-y-3">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-400">
               <GraduationCap className="w-4 h-4" />
-              <span>Academic Institution</span>
+              <span>{t(language, 'Academic Institution')}</span>
             </div>
             
             <h4 className="text-sm font-extrabold text-white">
@@ -63,42 +64,42 @@ export default function Footer({ onOpenPresentation }) {
           {/* Quick Links */}
           <div className="space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 block">
-              Quick Navigation
+              {t(language, 'Quick Navigation')}
             </span>
             <ul className="space-y-2 text-xs font-medium">
               <li>
                 <a href="#ai-assistant" className="hover:text-brand-accent transition-colors">
-                  ➔ Food Safety AI Assistant
+                  ➔ {t(language, 'Food Safety AI Assistant')}
                 </a>
               </li>
               <li>
                 <a href="#categories" className="hover:text-brand-accent transition-colors">
-                  ➔ Food Categories Matrix
+                  ➔ {t(language, 'Food Categories Matrix')}
                 </a>
               </li>
               <li>
                 <a href="#impact" className="hover:text-brand-accent transition-colors">
-                  ➔ Community Survey & Impact
+                  ➔ {t(language, 'Community Survey & Impact')}
                 </a>
               </li>
               <li>
                 <a href="#activities" className="hover:text-brand-accent transition-colors">
-                  ➔ Awareness Activities
+                  ➔ {t(language, 'Awareness Activities')}
                 </a>
               </li>
               <li>
                 <a href="#team" className="hover:text-brand-accent transition-colors">
-                  ➔ Meet Our Team (7 Members)
+                  ➔ {t(language, 'Meet Our Team (7 Members)')}
                 </a>
               </li>
               <li>
                 <a href="#about" className="hover:text-brand-accent transition-colors">
-                  ➔ About Project & Tanuku Roadmap
+                  ➔ {t(language, 'About Project & Tanuku Roadmap')}
                 </a>
               </li>
               <li>
                 <a href="#sources" className="hover:text-brand-accent transition-colors">
-                  ➔ Trusted Regulatory Sources
+                  ➔ {t(language, 'Trusted Regulatory Sources')}
                 </a>
               </li>
             </ul>
@@ -124,7 +125,7 @@ export default function Footer({ onOpenPresentation }) {
                 onClick={onOpenPresentation}
                 className="w-full py-2 px-3 text-xs font-bold text-emerald-950 bg-emerald-400 hover:bg-emerald-300 rounded-xl transition-all text-center shadow-sm"
               >
-                Open Review Presentation
+                {t(language, 'Open Review Presentation')}
               </button>
             </div>
           </div>
@@ -141,7 +142,7 @@ export default function Footer({ onOpenPresentation }) {
             onClick={scrollToTop}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-xs font-semibold transition-colors border border-emerald-800"
           >
-            <span>Back to Top</span>
+            <span>{t(language, 'Back to Top')}</span>
             <ArrowUp className="w-3.5 h-3.5" />
           </button>
         </div>

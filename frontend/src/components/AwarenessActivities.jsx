@@ -3,8 +3,9 @@ import {
   ClipboardList, Megaphone, Users, Store, FileText, 
   FlaskConical, MessageSquareHeart, Sparkles, CheckCircle2 
 } from 'lucide-react';
+import { t } from '../i18n';
 
-export default function AwarenessActivities() {
+export default function AwarenessActivities({ language = 'en' }) {
   const activities = [
     {
       icon: <ClipboardList className="w-6 h-6 text-emerald-600" />,
@@ -58,20 +59,20 @@ export default function AwarenessActivities() {
   ];
 
   return (
-    <section id="activities" className="py-16 sm:py-24 bg-white border-t border-slate-100">
+    <section id="activities" className={`py-16 sm:py-24 bg-white border-t border-slate-100 ${language === 'te' ? 'font-telugu' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-brand-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Sparkles className="w-4 h-4 text-emerald-600" />
-            Field Implementation
+            {t(language, 'Field Implementation')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-dark tracking-tight">
-            Community Awareness Activities
+            {t(language, 'Community Awareness Activities')}
           </h2>
           <p className="mt-2 text-base text-slate-600">
-            A comprehensive overview of on-ground awareness campaigns executed by our 7-member student team in Tanuku and nearby urban areas.
+            {t(language, 'A comprehensive overview of on-ground awareness campaigns executed by our 7-member student team in Tanuku and nearby urban areas.')}
           </p>
         </div>
 
@@ -88,22 +89,22 @@ export default function AwarenessActivities() {
                     {act.icon}
                   </div>
                   <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white border border-slate-200 text-brand-dark">
-                    {act.badge}
+                    {t(language, act.badge)}
                   </span>
                 </div>
 
                 <h3 className="text-base font-extrabold text-brand-dark group-hover:text-brand-primary transition-colors">
-                  {act.title}
+                  {t(language, act.title)}
                 </h3>
 
                 <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-                  {act.desc}
+                  {t(language, act.desc)}
                 </p>
               </div>
 
               <div className="mt-5 pt-3 border-t border-slate-200/60 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Field Executed</span>
+                <span>{t(language, 'Field Executed')}</span>
               </div>
             </div>
           ))}

@@ -6,8 +6,9 @@ import {
 import FoodResultCard from './FoodResultCard';
 import NonFoodCard from './NonFoodCard';
 import { analyzeFoodItem, sendChatMessage, getRecentSearches } from '../services/api';
+import { t } from '../i18n';
 
-export default function FoodSafetyAI({ initialFood = '', onSelectCategory }) {
+export default function FoodSafetyAI({ initialFood = '', onSelectCategory, language = 'en' }) {
   const [query, setQuery] = useState(initialFood);
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0); // 0: Idle, 1: Analyzing, 2: Checking sources, 3: Preparing info
@@ -111,7 +112,7 @@ export default function FoodSafetyAI({ initialFood = '', onSelectCategory }) {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'en-IN';
+    recognition.lang = language === 'te' ? 'te-IN' : 'en-IN';
     recognition.interimResults = false;
 
     recognition.onstart = () => setIsListening(true);
@@ -155,20 +156,20 @@ export default function FoodSafetyAI({ initialFood = '', onSelectCategory }) {
   };
 
   return (
-    <section id="ai-assistant" className="py-16 sm:py-24 bg-gradient-to-b from-white via-slate-50 to-emerald-50/40">
+    <section id="ai-assistant" className={`py-16 sm:py-24 bg-gradient-to-b from-white via-slate-50 to-emerald-50/40 ${language === 'te' ? 'font-telugu' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/80 border border-emerald-300 text-brand-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Bot className="w-4 h-4 text-emerald-700" />
-            AI-Powered Food Safety Engine
+            {t(language, 'AI-Powered Food Safety Engine')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-dark tracking-tight">
-            Food Safety AI
+            {t(language, 'Food Safety AI')}
           </h2>
           <p className="mt-2 text-base sm:text-lg text-slate-600">
-            Your Food Adulteration Awareness Assistant. Instant inspection, laboratory comparison, and safe purchasing recommendations.
+            {t(language, 'Your Food Adulteration Awareness Assistant. Instant inspection, laboratory comparison, and safe purchasing recommendations.')}
           </p>
         </div>
 
@@ -183,7 +184,7 @@ export default function FoodSafetyAI({ initialFood = '', onSelectCategory }) {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 font-bold text-sm text-brand-dark">
                   <Clock className="w-4 h-4 text-brand-teal" />
-                  <span>Recent Searches</span>
+                  <span>{t(language, 'Recent Searches')}</span>
                 </div>
                 {searches.length > 0 && (
                   <button
@@ -227,7 +228,7 @@ export default function FoodSafetyAI({ initialFood = '', onSelectCategory }) {
             <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-soft">
               <div className="flex items-center gap-2 font-bold text-sm text-brand-dark mb-3">
                 <Layers className="w-4 h-4 text-brand-primary" />
-                <span>Browse Categories</span>
+                <span>{t(language, 'Browse Categories')}</span>
               </div>
 
               <div className="space-y-2">

@@ -62,6 +62,21 @@ STRUCTURED FOOD SAFETY ADVISORY (Possible adulterants, test procedure, health ha
 
 ---
 
+## 🌐 Public Hosting on Render
+
+The repository includes a Render Blueprint (`render.yaml`) that configures the FastAPI backend and Vite frontend as separate free services.
+
+1. Push this project to a GitHub repository.
+2. In Render, choose **New + → Blueprint** and connect the repository.
+3. Review the detected `foodpure-api` and `foodpure-web` services, then deploy.
+4. Open the public URL shown for `foodpure-web`.
+
+The frontend is configured to use the deployed API automatically. The optional `GOOGLE_API_KEY` can be added as a secret environment variable on the `foodpure-api` service to enable Gemini responses; the curated knowledge base works without it.
+
+**Data note:** the SQLite database is stored on the service filesystem. On Render's free web service, local files are not durable across restarts or redeploys, so search history and feedback may reset. Use persistent storage or a managed database if that data must be retained.
+
+---
+
 ## 🚀 Quick Start (1-Click Run)
 
 Simply double-click:

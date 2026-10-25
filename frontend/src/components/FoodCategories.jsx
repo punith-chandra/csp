@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Layers, ArrowRight, ShieldCheck, Sparkles, Search } from 'lucide-react';
 import FoodDetailModal from './FoodDetailModal';
+import { t } from '../i18n';
 
-export default function FoodCategories({ onSelectFoodForAI }) {
+export default function FoodCategories({ onSelectFoodForAI, language = 'en' }) {
   const [selectedFood, setSelectedFood] = useState(null);
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -214,20 +215,20 @@ export default function FoodCategories({ onSelectFoodForAI }) {
     : categoriesData.filter(c => c.categoryName.toLowerCase().includes(activeCategory.toLowerCase()));
 
   return (
-    <section id="categories" className="py-16 sm:py-24 bg-white border-t border-slate-100">
+    <section id="categories" className={`py-16 sm:py-24 bg-white border-t border-slate-100 ${language === 'te' ? 'font-telugu' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-brand-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Layers className="w-4 h-4 text-emerald-600" />
-            Classified Food Matrix
+            {t(language, 'Classified Food Matrix')}
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-dark tracking-tight">
-            Food Categories & Common Adulterants
+            {t(language, 'Food Categories & Common Adulterants')}
           </h2>
           <p className="mt-2 text-base text-slate-600">
-            Browse across 8 major food product categories. Click any card to view detailed safety parameters, common adulterants, and preliminary identification methods.
+            {t(language, 'Browse across 8 major food product categories. Click any card to view detailed safety parameters, common adulterants, and preliminary identification methods.')}
           </p>
 
           {/* Filter Bar */}
@@ -242,7 +243,7 @@ export default function FoodCategories({ onSelectFoodForAI }) {
                     : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-brand-dark'
                 }`}
               >
-                {cat}
+                {t(language, cat)}
               </button>
             ))}
           </div>
@@ -261,15 +262,15 @@ export default function FoodCategories({ onSelectFoodForAI }) {
                   </div>
                   <div>
                     <h3 className="text-xl font-extrabold text-brand-dark">
-                      {category.categoryName}
+                      {t(language, category.categoryName)}
                     </h3>
                     <p className="text-xs text-slate-500">
-                      {category.desc}
+                      {t(language, category.desc)}
                     </p>
                   </div>
                 </div>
                 <span className="text-xs font-bold text-brand-teal bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
-                  {category.foods.length} Monitored Items
+                  {category.foods.length} {t(language, 'Monitored Items')}
                 </span>
               </div>
 
@@ -286,22 +287,22 @@ export default function FoodCategories({ onSelectFoodForAI }) {
                           {food.icon}
                         </span>
                         <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                          Awareness Guide
+                          {t(language, 'Awareness Guide')}
                         </span>
                       </div>
 
                       <h4 className="text-base font-bold text-brand-dark group-hover:text-brand-primary transition-colors">
-                        {food.name}
+                        {t(language, food.name)}
                       </h4>
 
                       <div className="mt-2.5 space-y-1.5 text-xs">
                         <div className="text-slate-500">
-                          <strong className="text-amber-800">Adulterants: </strong>
-                          {food.adulterants.join(', ')}
+                          <strong className="text-amber-800">{t(language, 'Adulterants:')} </strong>
+                          {food.adulterants.map((adulterant) => t(language, adulterant)).join(', ')}
                         </div>
                         <div className="text-slate-600 line-clamp-2">
-                          <strong className="text-brand-dark">Test: </strong>
-                          {food.testMethod}
+                          <strong className="text-brand-dark">{t(language, 'Test:')} </strong>
+                          {t(language, food.testMethod)}
                         </div>
                       </div>
                     </div>
@@ -311,7 +312,7 @@ export default function FoodCategories({ onSelectFoodForAI }) {
                         onClick={() => setSelectedFood(food)}
                         className="text-xs font-bold text-brand-teal hover:text-brand-dark flex items-center gap-1 transition-colors"
                       >
-                        <span>View Details</span>
+                        <span>{t(language, 'View Details')}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
 
@@ -319,7 +320,7 @@ export default function FoodCategories({ onSelectFoodForAI }) {
                         onClick={() => onSelectFoodForAI && onSelectFoodForAI(food.name)}
                         className="text-[11px] font-bold text-white bg-brand-primary hover:bg-brand-dark px-2.5 py-1 rounded-lg transition-colors"
                       >
-                        AI Check
+                        {t(language, 'AI Check')}
                       </button>
                     </div>
                   </div>
