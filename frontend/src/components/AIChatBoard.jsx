@@ -1,0 +1,804 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Plus, Search, PanelLeftClose, PanelLeft, RotateCcw, 
+  Mic, MicOff, Copy, Check, Volume2, VolumeX, ThumbsUp, 
+  ThumbsDown, ShieldCheck, BarChart3, BookOpen, 
+  Users, Sparkles, ExternalLink, ShieldAlert, FileText, ArrowRight
+} from 'lucide-react';
+import { analyzeFoodItem } from '../services/api';
+
+export default function AIChatBoard({ onSwitchToProjectView, onOpenPresentation, initialQuery = '' }) {
+  const [messages, setMessages] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+  const [speakingId, setSpeakingId] = useState(null);
+  const [quickMenuOpen, setQuickMenuOpen] = useState(false);
+  const [standardsModalOpen, setStandardsModalOpen] = useState(false);
+
+  // Recent queries list tailored to food safety & purity
+  const [chatHistory, setChatHistory] = useState([
+    { id: '1', title: 'Milk Adulteration & Purity', query: 'Milk' },
+    { id: '2', title: 'Turmeric Metanil Yellow Test', query: 'Turmeric' },
+    { id: '3', title: 'Honey Water Purity Test', query: 'Honey' },
+    { id: '4', title: 'Edible Oil Argemone Check', query: 'Edible Oil' },
+    { id: '5', title: 'Ghee & Vanaspati Detection', query: 'Ghee' },
+    { id: '6', title: 'Chilli Powder Brick Dust Check', query: 'Chilli Powder' },
+    { id: '7', title: 'Rice Polish & Mineral Oil', query: 'Rice' },
+  ]);
+
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (initialQuery) {
+      handleSend(initialQuery);
+    }
+  }, [initialQuery]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSend = async (customText = null) => {
+    const text = (customText !== null ? customText : inputValue).trim();
+    if (!text || loading) return;
+
+    setInputValue('');
+    setQuickMenuOpen(false);
+
+    const userMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: text,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setLoading(true);
+
+    try {
+      const foodData = await analyzeFoodItem(text);
+
+      let assistantMessage;
+      if (foodData.isFood) {
+        assistantMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          foodData: foodData,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+      } else {
+        assistantMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          isNonFood: true,
+          foodData: foodData,
+          content: `**${foodData.foodName || text}** is recognized as a non-food item.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+      }
+
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      // Add to sidebar history if not present
+      const exists = chatHistory.some((item) => item.query.toLowerCase() === text.toLowerCase());
+      if (!exists) {
+        setChatHistory((prev) => [
+          {
+            id: Date.now().toString(),
+            title: foodData.isFood ? `${foodData.foodName} Purity Check` : `${text.slice(0, 20)} (Non-food)`,
+            query: text
+          },
+          ...prev
+        ]);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: 'Unable to connect to the backend server. Please verify the service is running at http://localhost:8000.',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setInputValue('');
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (inputRef.current) inputRef.current.focus();
+  };
+
+  const handleCopy = (id, text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleSpeak = (id, text) => {
+    if (!window.speechSynthesis) return;
+
+    if (speakingId === id) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+    setSpeakingId(id);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice input is not supported in this browser. Please type your query.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+
+    recognition.onresult = (event) => {
+      const speechText = event.results[0][0].transcript;
+      setInputValue(speechText);
+      handleSend(speechText);
+    };
+
+    recognition.start();
+  };
+
+  // Helper to extract clean plain text for copy & speak
+  const getFoodSummaryText = (food) => {
+    if (!food) return '';
+    return `${food.foodName} Food Safety Information:\n` +
+      `Possible Adulterants: ${food.adulterants?.join(', ')}\n` +
+      `Why Adulteration Occurs: ${food.whyAdulterated}\n` +
+      `Awareness Test: ${food.testMethod} - ${food.observation}\n` +
+      `Health Risks: ${food.healthRisks?.join('; ')}\n` +
+      `Safe Buying Tips: ${food.safeTips?.join('; ')}\n` +
+      `Disclaimer: Preliminary awareness check only. Laboratory testing is required for scientific confirmation.`;
+  };
+
+  return (
+    <div className="flex h-screen bg-[#ffffff] text-[#0d0d0d] font-sans antialiased overflow-hidden selection:bg-emerald-100 selection:text-emerald-900">
+      
+      {/* 1. Left Sidebar: Unique Project Identity & Tools */}
+      <aside 
+        className={`bg-[#f9fafb] border-r border-[#e5e7eb] flex flex-col justify-between transition-all duration-300 z-30 ${
+          sidebarOpen ? 'w-64 sm:w-[270px]' : 'w-0 -translate-x-full sm:translate-x-0 sm:w-0'
+        } overflow-hidden`}
+      >
+        <div className="p-3 flex flex-col h-full">
+          
+          {/* Top Title: Unique Project Name */}
+          <div className="flex items-center justify-between px-2 py-2 mb-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold shadow-xs">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-extrabold text-[15px] text-[#0f172a] tracking-tight block leading-tight">
+                  FoodPure AI
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-600 block uppercase tracking-wider">
+                  Food Safety & Purity
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1 text-slate-500">
+              <button 
+                onClick={handleNewChat}
+                className="p-1.5 hover:text-slate-900 rounded-lg hover:bg-slate-200 transition-colors"
+                title="New analysis"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setSidebarOpen(false)}
+                className="p-1.5 hover:text-slate-900 rounded-lg hover:bg-slate-200 transition-colors"
+                title="Collapse sidebar"
+              >
+                <PanelLeftClose className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* "New Analysis" Button */}
+          <button
+            onClick={handleNewChat}
+            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[13px] font-semibold text-emerald-800 transition-colors mb-3 border border-emerald-200/60"
+          >
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <span>New Food Analysis</span>
+          </button>
+
+          {/* Project Feature Tools */}
+          <div className="space-y-0.5 mb-3 text-[13px] text-slate-600 font-medium">
+            <button 
+              onClick={handleNewChat}
+              className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Food Safety Analyzer</span>
+            </button>
+            <button 
+              onClick={() => setStandardsModalOpen(true)}
+              className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            >
+              <BookOpen className="w-4 h-4 text-teal-600" />
+              <span>FSSAI & AGMARK Rules</span>
+            </button>
+            <button 
+              onClick={onSwitchToProjectView}
+              className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            >
+              <BarChart3 className="w-4 h-4 text-blue-600" />
+              <span>Survey & Community Stats</span>
+            </button>
+            <button 
+              onClick={onOpenPresentation}
+              className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            >
+              <Users className="w-4 h-4 text-amber-600" />
+              <span>Project Team & Guide</span>
+            </button>
+            <button 
+              onClick={onSwitchToProjectView}
+              className="flex items-center gap-2.5 w-full px-3 py-1.5 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            >
+              <FileText className="w-4 h-4 text-indigo-600" />
+              <span>Full Website Showcase</span>
+            </button>
+          </div>
+
+          {/* Section: Recent Food Inquiries */}
+          <div className="px-3 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Recent Analyses
+          </div>
+
+          {/* History List */}
+          <div className="flex-1 overflow-y-auto space-y-0.5 pr-1 custom-scrollbar">
+            {chatHistory.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleSend(item.query)}
+                className="w-full text-left px-3 py-1.5 rounded-lg text-[13px] text-slate-700 hover:text-emerald-800 hover:bg-emerald-50/70 transition-colors truncate block"
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+
+          {/* Sidebar Bottom: Lead Profile & Sri Vasavi College Info */}
+          <div className="pt-2 border-t border-slate-200 mt-auto space-y-2">
+            
+            {/* User Profile (Puneeth chandra Peethala) */}
+            <div 
+              onClick={onOpenPresentation}
+              className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Click to view Project Team & Guide"
+            >
+              <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                PP
+              </div>
+              <div className="overflow-hidden leading-tight">
+                <div className="text-[13px] font-bold text-slate-900 truncate">
+                  Puneeth chandra Peethala
+                </div>
+                <div className="text-[11px] text-emerald-700 font-semibold truncate">
+                  Project Lead • 24A81A05G9
+                </div>
+              </div>
+            </div>
+
+            {/* College & Department Badge */}
+            <button
+              onClick={onOpenPresentation}
+              className="w-full py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors border border-slate-200"
+              title="Sri Vasavi Engineering College (Autonomous), Department of CSE"
+            >
+              <span>🏛️ Sri Vasavi Engg. College (CSE)</span>
+            </button>
+
+          </div>
+
+        </div>
+      </aside>
+
+      {/* 2. Main Center Content Canvas */}
+      <div className="flex-1 flex flex-col h-full bg-[#ffffff] relative overflow-hidden">
+        
+        {/* Top Header Bar */}
+        <header className="h-14 flex items-center justify-between px-4 sm:px-6 z-20 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            {!sidebarOpen && (
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setSidebarOpen(true)}
+                  className="p-1.5 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors mr-1"
+                  title="Open sidebar"
+                >
+                  <PanelLeft className="w-5 h-5" />
+                </button>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="font-bold text-[15px] text-slate-900 tracking-tight">
+                    FoodPure AI
+                  </span>
+                </div>
+              </div>
+            )}
+            <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+              <Sparkles className="w-3 h-3" />
+              AI-Powered Food Safety and Purity Analysis
+            </span>
+          </div>
+
+          {/* Top Right: Project Showcase & Presentation buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onSwitchToProjectView}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors border border-slate-200"
+              title="Switch to Full Project Website"
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-blue-600" />
+              <span className="hidden sm:inline">Project Showcase</span>
+            </button>
+
+            <button
+              onClick={onOpenPresentation}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-xs font-semibold text-white transition-colors shadow-xs"
+              title="Review Project Slides & Team"
+            >
+              <span>Presentation</span>
+            </button>
+
+            <button
+              onClick={handleNewChat}
+              className="p-1.5 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+              title="New session"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Conversation Stream OR Unique Landing Screen */}
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 max-w-3xl w-full mx-auto flex flex-col justify-between">
+          
+          {messages.length === 0 ? (
+            /* UNIQUE OFFICIAL LANDING SCREEN */
+            <div className="flex-1 flex flex-col items-center justify-center my-auto text-center px-4 py-8 animate-fadeIn">
+              
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 text-white flex items-center justify-center shadow-md mb-5">
+                <ShieldCheck className="w-9 h-9" />
+              </div>
+
+              <h1 className="text-[26px] sm:text-[32px] font-black text-slate-900 tracking-tight mb-2 leading-tight">
+                AI-Powered Food Safety and Purity Analysis
+              </h1>
+              
+              <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto mb-8 font-medium">
+                Detect adulteration risks, learn simple scientific home tests, and verify consumer food safety standards.
+              </p>
+
+              {/* Quick food staple chips */}
+              <div className="w-full max-w-xl grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-left mb-6">
+                {[
+                  { name: 'Milk', desc: 'Water, Starch & Urea test', icon: '🥛' },
+                  { name: 'Turmeric', desc: 'Metanil Yellow & Chalk check', icon: '🌶️' },
+                  { name: 'Honey', desc: 'Water solubility & wick test', icon: '🍯' },
+                  { name: 'Edible Oil', desc: 'Argemone oil & nitric acid test', icon: '🛢️' },
+                  { name: 'Ghee', desc: 'Vanaspati & Furfural check', icon: '🧈' },
+                  { name: 'Chilli Powder', desc: 'Brick powder & Sudan dye', icon: '🌶️' },
+                ].map((item) => (
+                  <button
+                    key={item.name}
+                    onClick={() => handleSend(item.name)}
+                    className="p-3 rounded-xl border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 transition-all text-left group bg-white shadow-xs"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">{item.icon}</span>
+                      <span className="font-bold text-sm text-slate-900 group-hover:text-emerald-700">
+                        {item.name}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 leading-tight">
+                      {item.desc}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-[11px] text-slate-400 font-medium">
+                Department of Computer Science and Engineering • Sri Vasavi Engineering College
+              </div>
+
+            </div>
+          ) : (
+            /* Clean Conversational Feed (NO ASCII Diagram) */
+            <div className="space-y-6 pb-6">
+              {messages.map((msg) => (
+                <div key={msg.id} className="space-y-4 animate-fadeIn">
+                  
+                  {/* User Message Bubble */}
+                  {msg.role === 'user' && (
+                    <div className="flex justify-end gap-3">
+                      <div className="bg-slate-100 text-slate-900 px-4 py-2.5 rounded-2xl rounded-tr-sm max-w-[85%] text-[15px] font-normal leading-relaxed border border-slate-200">
+                        {msg.content}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Assistant Message (Clean natural text - NO ASCII DIAGRAM) */}
+                  {msg.role === 'assistant' && (
+                    <div className="space-y-4 max-w-full">
+                      
+                      {/* Non-food Response */}
+                      {msg.isNonFood && (
+                        <div className="text-[15px] text-slate-900 leading-relaxed space-y-3 bg-amber-50/70 p-4 rounded-2xl border border-amber-200">
+                          <div className="flex items-center gap-2 text-amber-800 font-bold text-base">
+                            <ShieldAlert className="w-5 h-5 text-amber-600" />
+                            <span>Non-Food Item Detected: {msg.foodData?.foodName}</span>
+                          </div>
+                          <p className="text-slate-700">
+                            <strong>AI-Powered Food Safety and Purity Analysis</strong> is designed specifically for food commodities and edible grocery items.
+                          </p>
+                          <p className="text-slate-600 text-sm">
+                            Please check an edible grocery item such as <strong>Milk, Turmeric, Chilli Powder, Honey, Sugar, Ghee, or Edible Oil</strong> to inspect common adulterants and certified home test methods.
+                          </p>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {['Milk', 'Turmeric', 'Honey', 'Ghee', 'Edible Oil'].map((food) => (
+                              <button
+                                key={food}
+                                onClick={() => handleSend(food)}
+                                className="px-3 py-1 rounded-full bg-white hover:bg-emerald-50 text-xs font-semibold text-emerald-800 border border-emerald-300 transition-colors"
+                              >
+                                Check {food}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Food Safety Conversational Response */}
+                      {msg.foodData?.isFood && (
+                        <div className="text-[15px] text-slate-900 leading-relaxed space-y-4 font-sans">
+                          
+                          {/* Heading */}
+                          <div className="border-b border-slate-100 pb-2">
+                            <div className="flex items-center gap-2">
+                              <h2 className="text-xl font-bold text-slate-900">
+                                {msg.foodData.foodName} – Safety & Purity Advisory
+                              </h2>
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                                Verified
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Category: {msg.foodData.category || 'Food Commodity'} • System: AI-Powered Food Safety and Purity Analysis
+                            </p>
+                          </div>
+
+                          {/* 1. Common Adulterants */}
+                          <div className="space-y-1.5">
+                            <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                              <span>1. Possible Adulterants</span>
+                            </h3>
+                            <ul className="list-disc list-inside space-y-1 text-slate-800 text-[14px]">
+                              {(msg.foodData.adulterants || []).map((item, idx) => (
+                                <li key={idx}><span className="font-semibold text-slate-900">{item}</span></li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* 2. Why Adulteration Occurs */}
+                          <div className="space-y-1">
+                            <h3 className="font-bold text-slate-900 text-base">
+                              2. Motivation for Adulteration
+                            </h3>
+                            <p className="text-slate-700 text-[14px] leading-relaxed">
+                              {msg.foodData.whyAdulterated}
+                            </p>
+                          </div>
+
+                          {/* 3. Awareness Check */}
+                          <div className="space-y-2 bg-emerald-50/50 border border-emerald-200/80 p-4 rounded-xl">
+                            <h3 className="font-bold text-emerald-950 text-base flex items-center gap-2">
+                              <span>🧪 3. Preliminary Awareness Test Method</span>
+                            </h3>
+                            <p className="text-[14px] text-slate-800">
+                              <strong>Check: </strong>{msg.foodData.testMethod}
+                            </p>
+                            {msg.foodData.testProcedure && (
+                              <p className="text-[14px] text-slate-700 whitespace-pre-line bg-white p-3 rounded-lg border border-emerald-200">
+                                <strong>Step-by-step Procedure: </strong><br />{msg.foodData.testProcedure}
+                              </p>
+                            )}
+                            <p className="text-[14px] text-slate-800">
+                              <strong>Expected Result: </strong>{msg.foodData.observation}
+                            </p>
+                            <div className="text-[12px] text-amber-900 bg-amber-50 p-2.5 rounded border border-amber-200 mt-2 font-medium">
+                              ⚠️ <em><strong>Advisory:</strong> This is a preliminary household awareness check. Certified laboratory testing is required for scientific legal confirmation. Do not consume tested food portions.</em>
+                            </div>
+                          </div>
+
+                          {/* 4. Health Concerns */}
+                          <div className="space-y-1.5">
+                            <h3 className="font-bold text-slate-900 text-base">
+                              4. Potential Health Hazards
+                            </h3>
+                            <ul className="list-disc list-inside space-y-1 text-slate-800 text-[14px]">
+                              {(msg.foodData.healthRisks || []).map((risk, idx) => (
+                                <li key={idx}>{risk}</li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* 5. Safe Buying Tips */}
+                          <div className="space-y-1.5">
+                            <h3 className="font-bold text-slate-900 text-base">
+                              5. 🛒 Safe Purchasing Recommendations
+                            </h3>
+                            <ul className="list-disc list-inside space-y-1 text-slate-800 text-[14px]">
+                              {(msg.foodData.safeTips || []).map((tip, idx) => (
+                                <li key={idx}>{tip}</li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* 6. Storage Tips */}
+                          <div className="space-y-1.5">
+                            <h3 className="font-bold text-slate-900 text-base">
+                              6. 📦 Proper Storage Guidelines
+                            </h3>
+                            <ul className="list-disc list-inside space-y-1 text-slate-800 text-[14px]">
+                              {(msg.foodData.storageTips || []).map((tip, idx) => (
+                                <li key={idx}>{tip}</li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* 7. Official Sources */}
+                          <div className="space-y-1 pt-2 border-t border-slate-200 text-xs text-slate-600">
+                            <strong>Authoritative References & Standards:</strong>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {(msg.foodData.sources || []).map((s, idx) => (
+                                <a
+                                  key={idx}
+                                  href={s.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-medium underline"
+                                >
+                                  <span>{s.name}</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+
+                        </div>
+                      )}
+
+                      {/* Action Icons below response */}
+                      <div className="flex items-center gap-1 text-slate-400 text-xs pt-1">
+                        <button
+                          onClick={() => handleCopy(msg.id, msg.foodData ? getFoodSummaryText(msg.foodData) : msg.content)}
+                          className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
+                          title="Copy response"
+                        >
+                          {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+
+                        <button
+                          onClick={() => handleSpeak(msg.id, msg.foodData ? getFoodSummaryText(msg.foodData) : msg.content)}
+                          className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
+                          title="Read aloud"
+                        >
+                          {speakingId === msg.id ? <VolumeX className="w-3.5 h-3.5 text-rose-600" /> : <Volume2 className="w-3.5 h-3.5" />}
+                        </button>
+
+                        <button
+                          className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
+                          title="Helpful analysis"
+                        >
+                          <ThumbsUp className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
+                          title="Report concern"
+                        >
+                          <ThumbsDown className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={() => handleSend(messages[messages.length - 2]?.content || 'Milk')}
+                          className="p-1.5 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
+                          title="Re-analyze"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                    </div>
+                  )}
+
+                </div>
+              ))}
+
+              {/* Typing / Loading indicator */}
+              {loading && (
+                <div className="flex gap-2 items-center text-xs text-slate-500 py-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce" />
+                  <div className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.2s]" />
+                  <div className="w-2 h-2 rounded-full bg-emerald-600 animate-bounce [animation-delay:0.4s]" />
+                  <span className="font-mono text-emerald-800 ml-1">Analyzing food safety data & certified tests...</span>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+
+          {/* 3. Centered Floating Pill Input Bar */}
+          <div className="w-full pb-4 sm:pb-6 relative">
+            
+            {/* Quick Food Staples Selector */}
+            {quickMenuOpen && (
+              <div className="absolute bottom-20 left-0 bg-white border border-slate-200 rounded-2xl p-3 shadow-xl z-30 max-w-xs animate-fadeIn">
+                <div className="text-[11px] font-bold uppercase text-emerald-700 mb-2 px-1">
+                  Common Food Commodities
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { name: 'Milk', icon: '🥛' },
+                    { name: 'Turmeric', icon: '🌶️' },
+                    { name: 'Chilli Powder', icon: '🌶️' },
+                    { name: 'Honey', icon: '🍯' },
+                    { name: 'Sugar', icon: '🍚' },
+                    { name: 'Ghee', icon: '🧈' },
+                    { name: 'Edible Oil', icon: '🛢️' },
+                    { name: 'Rice', icon: '🌾' },
+                  ].map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => {
+                        setQuickMenuOpen(false);
+                        handleSend(item.name);
+                      }}
+                      className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-emerald-50 text-xs font-semibold text-slate-800 transition-colors"
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pill Container */}
+            <div className="flex items-center bg-white rounded-full border border-slate-300 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-md focus-within:shadow-md focus-within:border-emerald-500 transition-all px-3 py-2">
+              
+              {/* + Quick Staples Button */}
+              <button
+                onClick={() => setQuickMenuOpen(!quickMenuOpen)}
+                className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-full transition-colors mr-1"
+                title="Quick food staples menu"
+              >
+                <Plus className="w-5 h-5 stroke-[2]" />
+              </button>
+
+              {/* Text Input with Unique Placeholder */}
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Ask about food safety, adulteration checks, or test methods (e.g. Milk, Turmeric, Honey)..."
+                className="flex-1 bg-transparent py-1.5 px-2 text-[14px] sm:text-[15px] text-[#0d0d0d] placeholder:text-slate-400 focus:outline-none"
+              />
+
+              {/* Microphone Icon Button */}
+              <button
+                onClick={handleVoiceInput}
+                type="button"
+                className={`p-1.5 rounded-full transition-colors mr-1 ${
+                  isListening ? 'text-rose-600 bg-rose-50 animate-pulse' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                }`}
+                title="Voice inquiry"
+              >
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </button>
+
+              {/* Circular Send Button */}
+              <button
+                onClick={() => handleSend()}
+                disabled={loading || !inputValue.trim()}
+                className="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-30 disabled:hover:bg-emerald-600 text-white flex items-center justify-center transition-all shrink-0 shadow-xs"
+                title="Analyze food safety"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+            </div>
+
+          </div>
+
+        </main>
+
+      </div>
+
+      {/* FSSAI & AGMARK Standards Modal */}
+      {standardsModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-emerald-800 font-extrabold text-base">
+                <BookOpen className="w-5 h-5 text-emerald-600" />
+                <span>Certified Food Safety Standards</span>
+              </div>
+              <button 
+                onClick={() => setStandardsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-700 font-bold text-lg"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-3 text-xs sm:text-sm text-slate-700 max-h-96 overflow-y-auto">
+              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                <strong className="text-emerald-950 block mb-1">FSSAI (Food Safety and Standards Authority of India):</strong>
+                Mandates 14-digit license number and Food Safety Logo on all manufactured food products.
+              </div>
+              <div className="p-3 bg-teal-50 rounded-xl border border-teal-200">
+                <strong className="text-teal-950 block mb-1">AGMARK Certification:</strong>
+                Quality grade certification for agricultural products including pure honey, ghee, and edible spices.
+              </div>
+              <div className="p-3 bg-blue-50 rounded-xl border border-blue-200">
+                <strong className="text-blue-950 block mb-1">Jaago Grahak Jaago Guidelines:</strong>
+                Encourages consumers to demand sealed packaging and report adulterated food to local food inspectors.
+              </div>
+            </div>
+            <div className="text-right">
+              <button
+                onClick={() => setStandardsModalOpen(false)}
+                className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700"
+              >
+                Close Standards Guide
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
